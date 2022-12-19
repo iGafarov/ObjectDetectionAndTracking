@@ -61,7 +61,7 @@ while True:
             cx = int((x + x + w) / 2)
             cy = int((y + y + h) / 2)
             center_points_prev_frame.append((cx, cy))
-            print("FRAME N°", count, " ", x, y, w, h)
+            print("frame:", count, " ", x, y, w, h)
 
             cv2.rectangle(frame, (x, y), (x + w, y + h), color_list[(int)(id)], 2)
 
