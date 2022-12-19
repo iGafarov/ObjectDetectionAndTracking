@@ -28,9 +28,6 @@ while True:
     if not ret:
         break
 
-    # Point current frame
-    center_points_cur_frame = []
-
     # Detect objects on frame
     (class_ids, scores, boxes) = od.detect(frame)
 
@@ -40,14 +37,19 @@ while True:
         if class_id == 0:
             indexes_of_person_classes.append(index_of_person_class)
         index_of_person_class += 1
+
     if len(indexes_of_person_classes) != 0:
+        # Persons are found on the frame
         detects = np.zeros((len(indexes_of_person_classes), 5))
         count_detections = 0
+
+        # Getting the parameters of the founded objects for the tracker
         for i in range(0, len(indexes_of_person_classes)):
             (x, y, w, h, s) = np.append(boxes[indexes_of_person_classes[i]], scores[indexes_of_person_classes[i]])
             detection = np.array([w, h, x, y, s])
             detects[count_detections, :] = detection[:]
             count_detections += 1
+
         trackers = mot_tracker.update(detects)
         for tracker in trackers:
             (w, h, x, y, id) = tracker
@@ -73,7 +75,7 @@ while True:
     ret, frame = cap.read()
     ret, frame = cap.read()
     ret, frame = cap.read()
-    key = cv2.waitKey(1)
+    key = cv2.waitKey(0)
     if key == 27:
         break
 
