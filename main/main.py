@@ -1,12 +1,12 @@
 import cv2
 import random
 from object_detection import ObjectDetection
-from sort import *
+from object_tracking import *
 
 # Initialize Object Detection
 od = ObjectDetection()
 
-cap = cv2.VideoCapture("test.mp4")
+cap = cv2.VideoCapture("resources/test.mp4")
 
 # Initialize count
 count = 0
@@ -51,6 +51,9 @@ while True:
             count_detections += 1
 
         trackers = mot_tracker.update(detects)
+
+        print("frame  x  y  w  h  id")
+
         for tracker in trackers:
             (w, h, x, y, id) = tracker
             x = int(x)
@@ -61,7 +64,7 @@ while True:
             cx = int((x + x + w) / 2)
             cy = int((y + y + h) / 2)
             center_points_prev_frame.append((cx, cy))
-            print("frame:", count, " ", x, y, w, h)
+            print(count, " : ", x, y, w, h, id)
 
             cv2.rectangle(frame, (x, y), (x + w, y + h), color_list[(int)(id)], 2)
 
@@ -73,9 +76,7 @@ while True:
     ret, frame = cap.read()
     ret, frame = cap.read()
     ret, frame = cap.read()
-    ret, frame = cap.read()
-    ret, frame = cap.read()
-    key = cv2.waitKey(0)
+    key = cv2.waitKey(1)
     if key == 27:
         break
 
