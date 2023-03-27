@@ -22,6 +22,8 @@ color_list = []
 for j in range(1000):
     color_list.append(((int)(random.randrange(255)),(int)(random.randrange(255)),(int)(random.randrange(255))))
 
+trajectories = {}
+
 while True:
     ret, frame = cap.read()
     count += 1
@@ -56,11 +58,22 @@ while True:
 
         for tracker in trackers:
             (w, h, x, y, id) = tracker
+
             x = int(x)
             y = int(y)
             w = int(w)
             h = int(h)
             id = int(id)
+
+            track = (w, h, x, y)
+
+            if count == 1 or not trajectories.keys().__contains__(id):
+                list_of_tracks = [track]
+                trajectories[id] = list_of_tracks
+            else:
+                list_of_tracks = trajectories[id]
+                list_of_tracks.append(track)
+
             cx = int((x + x + w) / 2)
             cy = int((y + y + h) / 2)
             center_points_prev_frame.append((cx, cy))
@@ -78,6 +91,7 @@ while True:
     ret, frame = cap.read()
     key = cv2.waitKey(1)
     if key == 27:
+        print(trajectories)
         break
 
 cap.release()
