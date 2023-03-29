@@ -3,10 +3,14 @@ import random
 from object_detection import ObjectDetection
 from object_tracking import *
 
-# Initialize Object Detection
-od = ObjectDetection()
+weights_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\yolov4.weights"
+cfg_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\yolov4.cfg"
+path_to_video = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\resources\\test.mp4"
+classes_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\classes.txt"
 
-cap = cv2.VideoCapture("resources/test.mp4")
+# Initialize Object Detection
+od = ObjectDetection(weights_path, cfg_path, classes_path)
+cap = cv2.VideoCapture(path_to_video)
 
 # Initialize count
 count = 0
@@ -84,12 +88,7 @@ while True:
     cv2.imshow("Frame", frame)
 
     ret, frame = cap.read()
-    ret, frame = cap.read()
-    ret, frame = cap.read()
-    ret, frame = cap.read()
-    ret, frame = cap.read()
-    ret, frame = cap.read()
-    key = cv2.waitKey(1)
+    key = cv2.waitKey(0)
     if key == 27:
         print(trajectories)
         break
