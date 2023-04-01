@@ -10,16 +10,13 @@ class Tracker:
     encoder = None
     tracks = None
 
-    def __init__(self):
+    def __init__(self, encoder_model_path):
         max_cosine_distance = 0.4
         nn_budget = None
 
-        encoder_model_filename = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\model_data\\mars-small128.pb"
-        # encoder_model_filename = "model_data/mars-small128.pb"
-
         metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
         self.tracker = DeepSortTracker(metric)
-        self.encoder = gdet.create_box_encoder(encoder_model_filename, batch_size=1)
+        self.encoder = gdet.create_box_encoder(encoder_model_path, batch_size=1)
 
     def update(self, frame, detections):
 
