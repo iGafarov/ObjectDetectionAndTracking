@@ -21,7 +21,6 @@ class Tracker:
     def update(self, frame, detections):
 
         bboxes = np.asarray([d[:-1] for d in detections])
-        # bboxes[:, 2:] = bboxes[:, 2:] - bboxes[:, 0:2]
         scores = [d[-1] for d in detections]
 
         features = self.encoder(frame, bboxes)

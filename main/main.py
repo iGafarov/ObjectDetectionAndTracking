@@ -3,14 +3,7 @@ import random
 import numpy as np
 from detector import Detector
 from tracker import Tracker
-
-path_to_video = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\resources\\Walkers_Edit4.mp4"
-# Requirements for Object Detector
-weights_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\yolov4.weights"
-cfg_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\yolov4.cfg"
-classes_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\classes.txt"
-# Requirements for Object Tracker
-encoder_model_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\model_data\\mars-small128.pb"
+from utils.constants import *
 
 # Initialize Object Detection
 detector = Detector(weights_path, cfg_path, classes_path)
@@ -27,10 +20,12 @@ trajectories = {}
 # Start video analysis
 cap = cv2.VideoCapture(path_to_video)
 ret, frame = cap.read()
+skip = 105
 
 
 def analyze_trajectories(trajectories, step):
-    if len(trajectories) != 0:
+    person_count = len(trajectories)
+    if person_count != 0:
         for object_id in trajectories.keys():
             trajectory = trajectories[object_id]
 
@@ -60,11 +55,44 @@ def analyze_trajectories(trajectories, step):
                 prev_h = cur_h
 
 
+# def detect_manipulations(trajectories):
+#     person_count = len(trajectories)
+#     if person_count != 0:
+#         for object_id in trajectories.keys():
+#             trajectory = trajectories[object_id]
+#
+#             frames = list(trajectory.keys())
+#             first_detected_frame = frames[0]
+#             (prev_x, prev_y, prev_w, prev_h) = trajectory[first_detected_frame]
+#             frame_from = first_detected_frame
+#             for frame_key in frames:
+#                 (cur_x, cur_y, cur_w, cur_h) = trajectory[frame_key]
+#                 if abs(cur_x - prev_x) > step or abs(cur_y - prev_y) > step or abs(cur_w - prev_w) > step or abs(
+#                         cur_h - prev_h) > step:
+#                     # if frame_from == 0:
+#                     print('Video montage FOUNDED!')
+#                     print('Person id: ', object_id)
+#                     print('From frame ', frame_from, '. bbox: ', prev_x, ' ', prev_y, ' ', prev_w, ' ', prev_h)
+#                     print('To frame ', frame_key, '. bbox: ', cur_x, ' ', cur_y, ' ', cur_w, ' ', cur_h)
+#                 # if abs(cur_x - prev_x) < 2 and abs(cur_y - prev_y) < 2 and abs(cur_w - prev_w) < 2 and abs(
+#                 #         cur_h - prev_h) < 2:
+#                 #     if frame_from == 0:
+#                 #         frame_from = frame_count - 1
+#                 #     frame_count = frame_count + 1
+#                 #     continue
+#                 frame_from = frame_key
+#                 prev_x = cur_x
+#                 prev_y = cur_y
+#                 prev_w = cur_w
+#                 prev_h = cur_h
+
+
 while True:
     frame_counter += 1
     if not ret:
         break
-    if frame_counter > 195:
+    # if frame_counter > 0:
+    if frame_counter > skip:
         # Detect objects on frame
         (class_ids, scores, boxes) = detector.detect(frame)
 
@@ -109,13 +137,13 @@ while True:
     print('Frame: ', frame_counter)
 
     ret, frame = cap.read()
-    if frame_counter > 240:
-        key = cv2.waitKey(0)
+    if frame_counter > skip:
+        key = cv2.waitKey(1)
     else:
-        key = cv2.waitKey(0)
+        key = cv2.waitKey(1)
     if key == 27:
         print(trajectories)
-        analyze_trajectories(trajectories, 40)
+        analyze_trajectories(trajectories, 38)
         break
 cap.release()
 cv2.destroyAllWindows()
