@@ -17,74 +17,38 @@ for j in range(1000):
     color_list.append(((int)(random.randrange(255)), (int)(random.randrange(255)), (int)(random.randrange(255))))
 # Initialize trajectories chain
 trajectories = {}
+tracks_per_frame = {}
 # Start video analysis
 cap = cv2.VideoCapture(path_to_video)
 ret, frame = cap.read()
-skip = 105
+skip = 100
 
 
-def analyze_trajectories(trajectories, step):
-    person_count = len(trajectories)
-    if person_count != 0:
-        for object_id in trajectories.keys():
-            trajectory = trajectories[object_id]
+def detect_manipulations(tracks_per_frame, manipulations_percent):
+    if len(tracks_per_frame) != 0:
+        detected_manipulations = []
+        ids_on_prev_frame = []
+        prev_frame_number = 0
+        saved_ids_count = 0
+        for frame_number in tracks_per_frame.keys():
+            tracks_on_frame = tracks_per_frame[frame_number]
+            ids_on_current_frame = []
 
-            frames = list(trajectory.keys())
-            first_detected_frame = frames[0]
-            (prev_x, prev_y, prev_w, prev_h) = trajectory[first_detected_frame]
-            frame_from = first_detected_frame
-            for frame_key in frames:
-                (cur_x, cur_y, cur_w, cur_h) = trajectory[frame_key]
-                if abs(cur_x - prev_x) > step or abs(cur_y - prev_y) > step or abs(cur_w - prev_w) > step or abs(
-                        cur_h - prev_h) > step:
-                    # if frame_from == 0:
-                    print('Video montage FOUNDED!')
-                    print('Person id: ', object_id)
-                    print('From frame ', frame_from, '. bbox: ', prev_x, ' ', prev_y, ' ', prev_w, ' ', prev_h)
-                    print('To frame ', frame_key, '. bbox: ', cur_x, ' ', cur_y, ' ', cur_w, ' ', cur_h)
-                # if abs(cur_x - prev_x) < 2 and abs(cur_y - prev_y) < 2 and abs(cur_w - prev_w) < 2 and abs(
-                #         cur_h - prev_h) < 2:
-                #     if frame_from == 0:
-                #         frame_from = frame_count - 1
-                #     frame_count = frame_count + 1
-                #     continue
-                frame_from = frame_key
-                prev_x = cur_x
-                prev_y = cur_y
-                prev_w = cur_w
-                prev_h = cur_h
+            for (x, y, w, h, id) in tracks_on_frame:
+                ids_on_current_frame.append(id)
 
+            if len(ids_on_prev_frame) != 0:
+                for current_id in ids_on_current_frame:
+                    if ids_on_prev_frame.__contains__(current_id):
+                        saved_ids_count = saved_ids_count + 1
+                saved_ids_percent = (saved_ids_count / len(ids_on_prev_frame)) * 100
+                if 100 - saved_ids_percent >= manipulations_percent:
+                    detected_manipulations.append((prev_frame_number, frame_number))
 
-# def detect_manipulations(trajectories):
-#     person_count = len(trajectories)
-#     if person_count != 0:
-#         for object_id in trajectories.keys():
-#             trajectory = trajectories[object_id]
-#
-#             frames = list(trajectory.keys())
-#             first_detected_frame = frames[0]
-#             (prev_x, prev_y, prev_w, prev_h) = trajectory[first_detected_frame]
-#             frame_from = first_detected_frame
-#             for frame_key in frames:
-#                 (cur_x, cur_y, cur_w, cur_h) = trajectory[frame_key]
-#                 if abs(cur_x - prev_x) > step or abs(cur_y - prev_y) > step or abs(cur_w - prev_w) > step or abs(
-#                         cur_h - prev_h) > step:
-#                     # if frame_from == 0:
-#                     print('Video montage FOUNDED!')
-#                     print('Person id: ', object_id)
-#                     print('From frame ', frame_from, '. bbox: ', prev_x, ' ', prev_y, ' ', prev_w, ' ', prev_h)
-#                     print('To frame ', frame_key, '. bbox: ', cur_x, ' ', cur_y, ' ', cur_w, ' ', cur_h)
-#                 # if abs(cur_x - prev_x) < 2 and abs(cur_y - prev_y) < 2 and abs(cur_w - prev_w) < 2 and abs(
-#                 #         cur_h - prev_h) < 2:
-#                 #     if frame_from == 0:
-#                 #         frame_from = frame_count - 1
-#                 #     frame_count = frame_count + 1
-#                 #     continue
-#                 frame_from = frame_key
-#                 prev_x = cur_x
-#                 prev_y = cur_y
-#                 prev_w = cur_w
-#                 prev_h = cur_h
+            ids_on_prev_frame = ids_on_current_frame
+            prev_frame_number = frame_number
+            saved_ids_count = 0
+        return detected_manipulations
 
 
 while True:
@@ -121,20 +85,17 @@ while True:
             h = int(y2 - y1)
             id = track.track_id
 
-            bbox = (x, y, w, h)
+            tracked_object = (x, y, w, h, id)
 
-            if frame_counter == 1 or not trajectories.keys().__contains__(id):
-                dictionary_of_tracks = {frame_counter: bbox}
-                trajectories[id] = dictionary_of_tracks
+            if not tracks_per_frame.__contains__(frame_counter):
+                tracks_per_frame[frame_counter] = [tracked_object]
             else:
-                dictionary_of_tracks = trajectories[id]
-                dictionary_of_tracks[frame_counter] = bbox
+                tracks_per_frame[frame_counter].append(tracked_object)
 
             print(frame_counter, " : ", x, y, w, h, id)
             cv2.rectangle(frame, (x, y), (x + w, y + h), color_list[(int)(id)], 2)
 
     cv2.imshow("Frame", frame)
-    print('Frame: ', frame_counter)
 
     ret, frame = cap.read()
     if frame_counter > skip:
@@ -142,8 +103,8 @@ while True:
     else:
         key = cv2.waitKey(1)
     if key == 27:
-        print(trajectories)
-        analyze_trajectories(trajectories, 38)
+        print(tracks_per_frame)
         break
+print(detect_manipulations(tracks_per_frame, 70))
 cap.release()
 cv2.destroyAllWindows()

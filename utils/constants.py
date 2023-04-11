@@ -1,4 +1,4 @@
-path_to_video = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\resources\\Walkers_meld.mp4"
+path_to_video = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\resources\\Walkers_meld2.mp4"
 # Requirements for Object Detector
 weights_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\yolov4.weights"
 cfg_path = "C:\\Users\\iskan\\PycharmProjects\\ObjectDetectionAndTracking\\dnn_model\\yolov4.cfg"
