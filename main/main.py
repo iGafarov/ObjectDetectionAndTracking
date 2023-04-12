@@ -3,6 +3,7 @@ import random
 import numpy as np
 from detector import Detector
 from tracker import Tracker
+from manipulations_detector import ManipulationsDetector
 from utils.constants import *
 
 # Initialize Object Detection
@@ -21,35 +22,7 @@ tracks_per_frame = {}
 # Start video analysis
 cap = cv2.VideoCapture(path_to_video)
 ret, frame = cap.read()
-skip = 100
-
-
-def detect_manipulations(tracks_per_frame, manipulations_percent):
-    if len(tracks_per_frame) != 0:
-        detected_manipulations = []
-        ids_on_prev_frame = []
-        prev_frame_number = 0
-        saved_ids_count = 0
-        for frame_number in tracks_per_frame.keys():
-            tracks_on_frame = tracks_per_frame[frame_number]
-            ids_on_current_frame = []
-
-            for (x, y, w, h, id) in tracks_on_frame:
-                ids_on_current_frame.append(id)
-
-            if len(ids_on_prev_frame) != 0:
-                for current_id in ids_on_current_frame:
-                    if ids_on_prev_frame.__contains__(current_id):
-                        saved_ids_count = saved_ids_count + 1
-                saved_ids_percent = (saved_ids_count / len(ids_on_prev_frame)) * 100
-                if 100 - saved_ids_percent >= manipulations_percent:
-                    detected_manipulations.append((prev_frame_number, frame_number))
-
-            ids_on_prev_frame = ids_on_current_frame
-            prev_frame_number = frame_number
-            saved_ids_count = 0
-        return detected_manipulations
-
+skip = 0
 
 while True:
     frame_counter += 1
@@ -85,7 +58,7 @@ while True:
             h = int(y2 - y1)
             id = track.track_id
 
-            tracked_object = (x, y, w, h, id)
+            tracked_object = {id: (x, y, w, h)}
 
             if not tracks_per_frame.__contains__(frame_counter):
                 tracks_per_frame[frame_counter] = [tracked_object]
@@ -105,6 +78,8 @@ while True:
     if key == 27:
         print(tracks_per_frame)
         break
-print(detect_manipulations(tracks_per_frame, 70))
+
+manipulations_detector = ManipulationsDetector(tracks_per_frame)
+print(manipulations_detector.detect_manipulations(70))
 cap.release()
 cv2.destroyAllWindows()
