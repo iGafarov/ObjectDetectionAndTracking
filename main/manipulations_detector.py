@@ -50,11 +50,12 @@ class ManipulationsDetector:
                         if ids_on_prev_prev_frame.__contains__(prev_id):
                             saved_prev_ids.append(prev_id)
 
-                    # FOR TEST
+                    # FOR TEST (should be empty)
                     ids_that_saved_from_prev_prev_to_prev_but_not_saved_from_prev_prev_to_cur = []
                     for test_id in saved_prev_ids:
                         if not saved_ids.__contains__(test_id):
                             ids_that_saved_from_prev_prev_to_prev_but_not_saved_from_prev_prev_to_cur.append(test_id)
+                    print('test_list: ', ids_that_saved_from_prev_prev_to_prev_but_not_saved_from_prev_prev_to_cur)
 
                     # SECOND SITUATION
                     for saved_id in saved_ids:
@@ -101,21 +102,12 @@ class ManipulationsDetector:
                     if calculated_manipulations_percent >= manipulations_percent:
                         last_detected_id = len(detected_manipulations) - 1
                         if last_detected_id >= 0:
-                            from_frame, to_frame = detected_manipulations[last_detected_id]
+                            from_frame, to_frame, _ = detected_manipulations[last_detected_id]
                             if prev_prev_frame_number - from_frame == 1:
                                 detected_manipulations.pop(last_detected_id)
-                        detected_manipulations.append((prev_prev_frame_number, frame_number))
+                        detected_manipulations.append(
+                            (prev_prev_frame_number, frame_number, calculated_manipulations_percent))
                         print('DETECTEEEED')
-                    #
-                    # if len(ids_on_prev_frame) != 0:
-
-                #     saved_ids_percent = (saved_ids_count / len(ids_on_prev_frame)) * 100
-                #     if 100 - saved_ids_percent >= manipulations_percent:
-                #         detected_manipulations.append((prev_frame_number, frame_number))
-                #
-                # ids_on_prev_frame = ids_on_current_frame
-                # prev_frame_number = frame_number
-                # saved_ids_count = 0
             return detected_manipulations
 
     def calculate_average_speed(self, object_id):
