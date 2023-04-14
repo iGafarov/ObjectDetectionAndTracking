@@ -105,8 +105,10 @@ class ManipulationsDetector:
                             from_frame, to_frame, _ = detected_manipulations[last_detected_id]
                             if prev_prev_frame_number - from_frame == 1:
                                 detected_manipulations.pop(last_detected_id)
+
                         detected_manipulations.append(
                             (prev_prev_frame_number, frame_number, calculated_manipulations_percent))
+
                         print('DETECTEEEED')
             return detected_manipulations
 
